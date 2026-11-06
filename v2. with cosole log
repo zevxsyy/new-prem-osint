@@ -1,0 +1,132 @@
+from tkinter import *
+from tkinter import messagebox
+import json, requests, httpx
+mc,color,lib = "Chiller", "orange", "requests"
+found = []
+def check_all(name):
+    f = open("sites.json", encoding="utf-8")
+    sites = json.load(f)
+    result = []
+    for site in sites:
+        url = sites[site].replace("{}", name)
+        try:
+            if lib == "requests":
+                code = requests.get(url, timeout=3).status_code
+            else:
+                code = httpx.get(url, timeout=3).status_code
+        except:
+            code = 0
+        if code == 200:
+            print("[+]", site, url)
+            result.append(site + "  " + url)
+        else:
+            print("[-]", site)
+    return result
+def hide():
+    for w in all_widgets:
+        w.place_forget()
+def show_menu():
+    hide()
+    title.place(x=120, y=70)
+    btn_start.place(x=150, y=200)
+    btn_info.place(x=150, y=260)
+    btn_settings.place(x=150, y=320)
+    btn_exit.place(x=150, y=400)
+def show_info():
+    hide()
+    skull_info.place(x=225, y=40)
+    info1.place(x=60, y=100, width=380)
+    info2.place(x=60, y=230, width=380)
+    info3.place(x=60, y=360, width=380)
+    btn_back1.place(x=150, y=500)
+def show_settings():
+    hide()
+    set_label.place(x=110, y=140, width=280, height=32)
+    entry.place(x=110, y=172, width=280, height=36)
+    btn_color.place(x=150, y=260)
+    btn_lib.place(x=150, y=320)
+    btn_back2.place(x=150, y=450)
+def change_color():
+    global color
+    if color == "orange":color = "purple"
+    elif color == "purple":color = "lime"
+    elif color == "lime":color = "red"
+    elif color == "red":color = "white"
+    else:color = "orange"
+    for w in all_widgets:
+        w.config(fg=color)
+    footer.config(fg=color)
+    footer_left.config(fg=color)
+    footer_right.config(fg=color)
+def change_lib():
+    global lib
+    if lib == "requests":lib = "httpx"
+    else:lib = "requests"
+    btn_lib.config(text="library: " + lib)
+def start():
+    global found
+    text = entry.get()
+    if text == "":
+        messagebox.showerror("ашибка", "заполни юз или почту жертвы в настройки!")
+        return
+    if "@" in text:text = text.split("@")[0]
+    hide()
+    searching.place(x=150, y=250)
+    small.place(x=70, y=300)
+    oke.place(x=120, y=400)
+    root.update()
+    found = check_all(text)
+    hide()
+    found_label.config(text="найдено соцсетей: " + str(len(found)))
+    found_label.place(x=110, y=200)
+    btn_show.place(x=150, y=280)
+    btn_menu.place(x=150, y=340)
+def show_links():
+    win = Toplevel()
+    win.geometry("500x400")
+    win.config(bg="black")
+    text = Text(win, bg="black", fg=color, font=(mc, 14), width=60, height=22)
+    text.place(x=10, y=10)
+    for link in found:
+        text.insert(END, link + "\n")
+root = Tk()
+root.title("1200 anomalies")
+root.geometry("500x600")
+root.config(bg="black")
+title = Label(root, text="1200 anomalies", bg="black", fg=color, font=(mc, 30))
+btn_start = Button(root, text="start", width=18, bg="black", fg=color, font=(mc, 18), command=start)
+btn_info = Button(root, text="information", width=18, bg="black", fg=color, font=(mc, 18), command=show_info)
+btn_settings = Button(root, text="settings", width=18, bg="black", fg=color, font=(mc, 18), command=show_settings)
+btn_exit = Button(root, text="exit", width=18, bg="black", fg=color, font=(mc, 18), command=root.destroy)
+skull_info = Label(root, text="N", bg="black", fg=color, font=("Wingdings", 20))
+info1 = Label(root, bg="#1c1c1c", fg=color, font=(mc, 16), justify=LEFT, anchor="w", padx=10, pady=6,
+              text="backend - zevxsyy\nfrontend - kiorane, zevxsyy\nengineer - ah3ova, zevxsyy\nidea - zevxsyy")
+info2 = Label(root, bg="#1c1c1c", fg=color, font=(mc, 16), justify=LEFT, anchor="w", padx=10, pady=6,
+              text="socials:\ntg: zevxsyy, kiorane\ntg ch: tembedded\ngithub: zevxsyy, kiorane, ah3ova")
+info3 = Label(root, bg="#1c1c1c", fg=color, font=(mc, 16), justify=LEFT, anchor="w", padx=10, pady=6,
+              text="doing time: 12d 4h 12min")
+btn_back1 = Button(root, text="back", width=18, bg="black", fg=color, font=(mc, 18), command=show_menu)
+set_label = Label(root, text="username / email:", bg="#1c1c1c", fg=color, font=(mc, 16))
+entry = Entry(root, width=24, bg="#1c1c1c", fg=color, font=(mc, 18))
+btn_color = Button(root, text="text color", width=18, bg="black", fg=color, font=(mc, 18), command=change_color)
+btn_lib = Button(root, text="library: requests", width=18, bg="black", fg=color, font=(mc, 18), command=change_lib)
+btn_back2 = Button(root, text="back", width=18, bg="black", fg=color, font=(mc, 18), command=show_menu)
+searching = Label(root, text="search...", bg="black", fg=color, font=(mc, 28))
+small = Label(root, text="в среднем занимает 5-10 мин, смотри терминал", bg="black", fg=color, font=(mc, 13))
+oke=Label(root, text="результат отобразится тут. удачи", bg="black", fg="red",font=(mc,8))
+found_label = Label(root, text="", bg="black", fg=color, font=(mc, 20))
+btn_show = Button(root, text="show", width=18, bg="black", fg=color, font=(mc, 18), command=show_links)
+btn_menu = Button(root, text="menu", width=18, bg="black", fg=color, font=(mc, 18), command=show_menu)
+footer = Label(root, text="helloween edition", bg="black", fg=color, font=(mc, 18))
+footer.place(x=160, y=555)
+footer_left = Label(root, text="N", bg="black", fg=color, font=("Wingdings", 16))
+footer_left.place(x=120, y=558)
+footer_right = Label(root, text="N", bg="black", fg=color, font=("Wingdings", 16))
+footer_right.place(x=335, y=558)
+all_widgets = [title, btn_start, btn_info, btn_settings, btn_exit,
+               skull_info, info1, info2, info3, btn_back1,
+               set_label, entry, btn_color, btn_lib, btn_back2,
+               searching, small, oke,
+               found_label, btn_show, btn_menu]
+show_menu()
+root.mainloop()
